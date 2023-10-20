@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import visdom
 import random
+from tqdm import tqdm
 
 from mcnn_model import MCNN
 from my_dataloader import CrowdDataset
@@ -10,8 +11,11 @@ from my_dataloader import CrowdDataset
 
 if __name__=="__main__":
     torch.backends.cudnn.enabled=False
-    vis=visdom.Visdom()
-    device=torch.device("cuda")
+    # vis=visdom.Visdom() 
+    if torch.cuda.is_available():
+        device=torch.device("cuda")
+    else:
+        device=torch.device("cpu")
     mcnn=MCNN().to(device)
     criterion=nn.MSELoss(size_average=False).to(device)
     optimizer = torch.optim.SGD(mcnn.parameters(), lr=1e-6,
@@ -22,10 +26,10 @@ if __name__=="__main__":
     dataset=CrowdDataset(img_root,gt_dmap_root,4)
     dataloader=torch.utils.data.DataLoader(dataset,batch_size=1,shuffle=True)
 
-    test_img_root='D:\\workspaceMaZhenwei\\GithubProject\\MCNN-pytorch\\data\\Shanghai_part_A\\test_data\\images'
-    test_gt_dmap_root='D:\\workspaceMaZhenwei\\GithubProject\\MCNN-pytorch\\data\\Shanghai_part_A\\test_data\\ground_truth'
-    test_dataset=CrowdDataset(test_img_root,test_gt_dmap_root,4)
-    test_dataloader=torch.utils.data.DataLoader(test_dataset,batch_size=1,shuffle=False)
+    # test_img_root='D:\\workspaceMaZhenwei\\GithubProject\\MCNN-pytorch\\data\\Shanghai_part_A\\test_data\\images'
+    # test_gt_dmap_root='D:\\workspaceMaZhenwei\\GithubProject\\MCNN-pytorch\\data\\Shanghai_part_A\\test_data\\ground_truth'
+    # test_dataset=CrowdDataset(test_img_root,test_gt_dmap_root,4)
+    # test_dataloader=torch.utils.data.DataLoader(test_dataset,batch_size=1,shuffle=False)
 
     #training phase
     if not os.path.exists('./checkpoints'):
@@ -35,7 +39,7 @@ if __name__=="__main__":
     train_loss_list=[]
     epoch_list=[]
     test_error_list=[]
-    for epoch in range(0,2000):
+    for epoch in tqdm(range(0,2000)):
 
         mcnn.train()
         epoch_loss=0
